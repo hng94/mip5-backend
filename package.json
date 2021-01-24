@@ -1,0 +1,25 @@
+{
+  "name": "mip5-backend",
+  "version": "0.0.1",
+  "description": "Awesome project developed with TypeORM.",
+  "devDependencies": {
+    "@types/node": "^8.0.29",
+    "http-errors": "^1.8.0",
+    "ts-node": "3.3.0",
+    "typescript": "3.3.3333"
+  },
+  "dependencies": {
+    "apollo-server": "^2.19.2",
+    "apollo-server-express": "^2.19.2",
+    "body-parser": "^1.18.1",
+    "class-validator": "^0.13.1",
+    "express": "^4.15.4",
+    "pg": "^8.4.0",
+    "reflect-metadata": "^0.1.10",
+    "type-graphql": "^1.1.1",
+    "typeorm": "0.2.30"
+  },
+  "scripts": {
+    "start": "nodemon src/server.ts"
+  }
+}
