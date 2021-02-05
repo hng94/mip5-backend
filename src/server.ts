@@ -1,25 +1,40 @@
 import "reflect-metadata";
 import { createConnection } from "typeorm";
 import * as express from "express";
-import * as bodyParser from "body-parser";
-import { Request, Response, NextFunction } from "express";
-import Routes from "./route";
 import { buildSchema } from "type-graphql";
-import { ApolloServer, gql } from "apollo-server-express";
-import { UserResolver } from "./resolver/UserResolver";
-
-const PORT = 8000;
+import { ApolloServer } from "apollo-server-express";
+import { UserResolver } from "./resolver/user.resolver.";
+import { jwtMiddleware, customAuthChecker } from "./middleware/auth";
+import { AuthResolver } from "./resolver/auth.resolver";
+import { ProjectResolver } from "./resolver/project.resolver";
+import { CategoryResolver } from "./resolver/category.resolver";
 
 createConnection()
-  .then(async (connection) => {
+  .then(async () => {
     // create appollo server
     const schema = await buildSchema({
-      resolvers: [UserResolver],
+      resolvers: [
+        // UserResolver,
+        AuthResolver,
+        // ProjectResolver,
+        // CategoryResolver,
+      ],
+      authChecker: customAuthChecker,
     });
-    const server = new ApolloServer({ schema });
+    const server = new ApolloServer({
+      schema,
+      context: ({ req }) => {
+        const context = {
+          req,
+          user: req.user, // `req.user` comes from `express-jwt`
+        };
+        return context;
+      },
+    });
 
     // connect expressjs app
     const app = express();
+    app.use(jwtMiddleware);
     server.applyMiddleware({ app });
 
     // start express server
