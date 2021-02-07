@@ -1,16 +1,12 @@
 import { Resolver, Query, Arg, Authorized } from "type-graphql";
-import { User } from "../entity/user.entity";
+import { User as UserEntity } from "../entity/user.entity";
+import { UserDTO } from "../schema/user.schema";
 
-@Resolver(User)
+@Resolver(UserEntity)
 export class UserResolver {
-  @Query(() => String)
-  hello() {
-    return "hellow world motherfucker";
-  }
-
   @Authorized()
-  @Query(() => User)
+  @Query(() => UserDTO)
   async user(@Arg("id") id: string) {
-    return await User.findOne(id);
+    return await UserEntity.findOne(id);
   }
 }

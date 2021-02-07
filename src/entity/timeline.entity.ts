@@ -5,16 +5,21 @@ import { BaseClass } from "./base.entity";
 import { Project } from "./project.entity";
 import { User } from "./user.entity";
 
-@ObjectType()
 @Entity()
 export class Timeline extends BaseClass {
   @ManyToOne(() => User)
   creator!: User;
 
   @ManyToOne(() => Project, (project) => project.timelines)
-  project!: Project;
+  project: Project;
 
   @Field(() => String)
   @Column({ nullable: false })
   content!: string;
+
+  constructor(creator: User, content: string) {
+    super();
+    this.creator = creator;
+    this.content = content;
+  }
 }

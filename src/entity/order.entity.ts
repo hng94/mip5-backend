@@ -6,10 +6,10 @@ import { User } from "./user.entity";
 
 @Entity()
 export class Order extends BaseClass {
-  @ManyToOne(() => User, (user) => user.orders)
+  @ManyToOne(() => User, (user) => user.orders, { eager: true })
   creator!: User;
 
-  @ManyToOne(() => Product, (product) => product.orders)
+  @ManyToOne(() => Product, (product) => product.orders, { eager: true })
   product!: Product;
 
   @Column({ nullable: false })

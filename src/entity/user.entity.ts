@@ -4,7 +4,14 @@ import {
   IsNotEmpty,
   IsPostalCode,
 } from "class-validator";
-import { Entity, Column, Unique, OneToMany, BeforeInsert } from "typeorm";
+import {
+  Entity,
+  Column,
+  Unique,
+  OneToMany,
+  BeforeInsert,
+  Index,
+} from "typeorm";
 import { BaseClass } from "./base.entity";
 import { Comment } from "./comment.entity";
 import { Order } from "./order.entity";
@@ -25,6 +32,7 @@ export class User extends BaseClass {
   @Column({ nullable: false })
   @IsEmail({}, { message: "Incorrect email" })
   @IsLowercase()
+  @Index()
   email!: string;
 
   @Column({ nullable: false })
@@ -45,7 +53,10 @@ export class User extends BaseClass {
   @OneToMany(() => Order, (order) => order.creator)
   orders?: Order[];
 
-  @OneToMany(() => Comment, (comment) => comment.creator)
+  @OneToMany(() => Comment, (comment) => comment.creator, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
   comments?: Comment[];
 
   @BeforeInsert()

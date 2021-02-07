@@ -1,8 +1,11 @@
 import { IsEmail } from "class-validator";
-import { Field, InputType, ObjectType } from "type-graphql";
+import { Field, ID, InputType, ObjectType } from "type-graphql";
 
 @ObjectType()
-export class Auth {
+export class AuthDTO {
+  @Field((type) => ID)
+  id: string;
+
   @Field()
   email!: string;
 

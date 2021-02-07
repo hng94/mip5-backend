@@ -3,7 +3,7 @@ import * as config from "config";
 import * as expressJWT from "express-jwt";
 import * as jwt from "jsonwebtoken";
 import { AuthChecker } from "type-graphql";
-import { Context } from "../common/type";
+import { AuthContext } from "../common/type";
 
 const secretKey: string = config.get("secretKey");
 
@@ -13,7 +13,7 @@ export const jwtMiddleware = expressJWT({
   algorithms: ["HS256"],
 });
 
-export const customAuthChecker: AuthChecker<Context> = (ctx) => {
+export const customAuthChecker: AuthChecker<AuthContext> = (ctx) => {
   const {
     context: { req },
   } = ctx;

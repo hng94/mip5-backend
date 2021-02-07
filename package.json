@@ -33,6 +33,7 @@
   },
   "scripts": {
     "start": "nodemon src/server.ts",
+    "start:debug": "nodemon --inspect src/server.ts",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js"
   }
 }

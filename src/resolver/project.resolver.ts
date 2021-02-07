@@ -1,27 +1,30 @@
 import { AuthenticationError } from "apollo-server";
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { getRepository } from "typeorm";
-import { Context } from "../common/type";
+import { AuthContext } from "../common/type";
 import { BaseClass } from "../entity/base.entity";
 import { Category } from "../entity/category.entity";
+import { Comment } from "../entity/comment.entity";
+import { Like } from "../entity/like.entity";
 import { Product } from "../entity/product.entity";
+import { Project } from "../entity/project.entity";
+import { Timeline } from "../entity/timeline.entity";
+import { User } from "../entity/user.entity";
 import {
   CreateProjectInput,
-  Project,
+  ProjectDTO,
   QueryProjectInput,
-} from "../entity/project.entity";
-import { User } from "../entity/user.entity";
+  UpdateProjectInput,
+} from "../schema/project.schema";
 
 @Resolver(Project)
 export class ProjectResolver {
-  @Query(() => [Project])
+  @Query(() => [ProjectDTO])
   async projects(@Arg("data") data: QueryProjectInput) {
     const query = getRepository(Project)
       .createQueryBuilder("project")
       .leftJoinAndSelect("project.creator", "user")
       .leftJoinAndSelect("project.category", "category")
-      .leftJoinAndSelect("project.comments", "comments")
-      .leftJoinAndSelect("project.likes", "likes")
       .select();
 
     //build query
@@ -52,25 +55,36 @@ export class ProjectResolver {
     return projects;
   }
 
-  @Query(() => Project)
+  @Query(() => ProjectDTO)
   async project(@Arg("id") id: string) {
     const project = await Project.findOne(id);
     return project;
   }
 
-  @Mutation(() => Project)
-  async createProject(@Arg("data") data: CreateProjectInput) {
+  @Authorized()
+  @Mutation(() => ProjectDTO)
+  async createProject(
+    @Arg("data") data: CreateProjectInput,
+    @Ctx() context: AuthContext
+  ) {
+    const { currentUser } = context;
     try {
-      const category = await Category.findOneOrFail({ id: data.categoryId });
-      const creator = await User.findOneOrFail({ email: data.creatorEmail });
+      const category = await Category.findOne({ id: data.categoryId });
+      const creator = await User.findOne({ id: currentUser.id });
       if (category && creator) {
-        const project = await Project.create({
-          title: data.title,
-          creator,
-          category,
+        const project = await Project.create(data);
+        project.creator = creator;
+        project.category = category;
+        project.products = new Array<Product>();
+        data.products.forEach((product) => {
+          project.products.push(product as Product);
         });
-        const product = await Product.create(data.product);
-        project.products.push(product);
+        project.comments = new Array<Comment>();
+        project.backers = new Array<User>();
+        project.likes = new Array<Like>();
+        project.timelines = new Array<Timeline>();
+        const firstTimeline = new Timeline(project.creator, "Project created");
+        project.timelines.push(firstTimeline);
         await project.save();
         return project;
       }
@@ -80,24 +94,39 @@ export class ProjectResolver {
   }
 
   @Authorized()
-  @Mutation(() => Project)
-  async updateProject(@Arg("data") data: QueryProjectInput, @Ctx() context) {
+  @Mutation(() => ProjectDTO)
+  async updateProject(
+    @Arg("data") data: UpdateProjectInput,
+    @Ctx() context: AuthContext
+  ) {
     try {
       let project = await Project.findOne(data.id);
-      const currentUser = await context.user;
-      if (project && project.creator.id === currentUser.id) {
-        Object.keys(data).forEach((prop) => {
-          if (data[prop]) {
-            project[prop] = data[prop];
-          }
-        });
-        await project.save();
-        return project;
-      } else {
-        throw new AuthenticationError("Invalid User");
+      Object.keys(data).forEach((prop) => {
+        if (prop != "id" && data[prop]) {
+          project[prop] = data[prop];
+        }
+      });
+      if (data.categoryId) {
+        const category = await Category.findOne(data.categoryId);
+        project.category = category;
       }
+      await project.save();
+      return project;
     } catch (error) {
       return error;
+    }
+  }
+
+  @Authorized()
+  @Mutation(() => Boolean)
+  async removeProject(@Arg("id") id: string, @Ctx() context) {
+    try {
+      const project = await Project.findOne(id);
+      await project.softRemove();
+      project.save();
+      return true;
+    } catch (error) {
+      throw error;
     }
   }
 }

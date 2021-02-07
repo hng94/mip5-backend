@@ -8,10 +8,10 @@ import { User } from "./user.entity";
 
 @Entity()
 export class Comment extends BaseClass {
-  @ManyToOne(() => User, (user) => user.comments)
+  @ManyToOne(() => User, (user) => user.comments, { nullable: false })
   creator!: User;
 
-  @ManyToOne(() => Project, (proj) => proj.comments)
+  @ManyToOne(() => Project, (proj) => proj.comments, { nullable: false })
   project: Project;
 
   @Column({ nullable: false })

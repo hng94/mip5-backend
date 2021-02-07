@@ -1,4 +1,6 @@
 import {
+  AfterLoad,
+  BeforeInsert,
   BeforeUpdate,
   Column,
   Entity,
@@ -12,11 +14,9 @@ import { BaseClass } from "./base.entity";
 import { Category } from "./category.entity";
 import { Product } from "./product.entity";
 import { User } from "./user.entity";
-import slugify from "slugify";
 import { Timeline } from "./timeline.entity";
 import { IsPositive } from "class-validator";
 import { Comment } from "./comment.entity";
-import { SortEnum } from "../common/enum";
 import { Like } from "./like.entity";
 
 @Entity()
@@ -27,16 +27,29 @@ export class Project extends BaseClass {
   @Column()
   subTitle!: string;
 
-  @ManyToOne(() => Category, (category) => category.projects, { eager: true })
+  @Column({ nullable: true })
+  url?: string;
+
+  @ManyToOne(() => Category, (category) => category.projects, {
+    eager: true,
+    nullable: false,
+    cascade: true,
+  })
   category!: Category;
 
   @Column({ default: "" })
   story: string = "";
 
-  @ManyToOne(() => User, (user) => user.projects, { eager: true })
+  @ManyToOne(() => User, (user) => user.projects, {
+    eager: true,
+    nullable: false,
+  })
   creator!: User;
 
-  @OneToMany(() => Timeline, (timeline) => timeline.project, { eager: true })
+  @OneToMany(() => Timeline, (timeline) => timeline.project, {
+    eager: true,
+    cascade: true,
+  })
   timelines: Timeline[];
 
   @ManyToMany(() => User)
@@ -45,66 +58,31 @@ export class Project extends BaseClass {
 
   @OneToMany(() => Product, (product) => product.project, {
     eager: true,
+    cascade: true,
   })
   products: Product[];
 
-  @OneToMany(() => Like, (like) => like.project, { eager: true })
+  @OneToMany(() => Like, (like) => like.project, { eager: true, cascade: true })
   likes: Like[];
 
   @Column({ default: 0 })
   @IsPositive()
   likeCount: number = 0;
 
-  @OneToMany(() => Comment, (comment) => comment.project, { eager: true })
+  @OneToMany(() => Comment, (comment) => comment.project, {
+    eager: true,
+    cascade: true,
+  })
   comments: Comment[];
 
   @Column({ default: 0 })
   @IsPositive()
   commentCount: number = 0;
 
-  // @BeforeInsert()
-  // slugifyProjectName() {
-  //   this.subTitle = slugify(this.title);
-  // }
-
-  @BeforeUpdate()
+  @AfterLoad()
   updateProperties() {
     // this.subTitle = slugify(this.title);
     this.commentCount = this.comments ? this.comments.length : 0;
     this.likeCount = this.likes ? this.likes.length : 0;
   }
-}
-
-export class QueryProjectInput {
-  id?: string;
-
-  searchKey?: string;
-
-  categoryId?: string;
-
-  creatorId?: string;
-
-  order?: SortEnum = null;
-
-  take?: number = 9;
-
-  skip?: number = 0;
-}
-
-export class CreateProjectInput {
-  title: string;
-
-  subTitle: string;
-
-  creatorEmail: string;
-
-  categoryId: string;
-
-  story: string;
-
-  product: Partial<Product>;
-
-  startDate: Date;
-
-  duration: number;
 }
