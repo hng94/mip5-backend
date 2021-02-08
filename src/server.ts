@@ -16,6 +16,7 @@ import { AuthDTO } from "./schema/auth.schema";
 import { OrderResolver } from "./resolver/order.resolver";
 import { AuthContext } from "./common/type";
 
+const PORT = process.env.PORT || 4000;
 createConnection()
   .then(async () => {
     // create appollo server
@@ -51,9 +52,9 @@ createConnection()
     // server.applyMiddleware({ app });
 
     // start express server
-    server.listen({ port: 4000 }, () =>
+    server.listen({ port: PORT }, () =>
       console.log(
-        `🚀 Server ready at http://localhost:4000${server.graphqlPath}`
+        `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
       )
     );
   })
