@@ -16,7 +16,7 @@ import { BaseClass } from "./base.entity";
 import { Comment } from "./comment.entity";
 import { Order } from "./order.entity";
 import { Project } from "./project.entity";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 
 @Entity()
 @Unique(["email"])
