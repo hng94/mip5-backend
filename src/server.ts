@@ -40,6 +40,9 @@ createConnection()
         };
         return context;
       },
+      playground: {
+        endpoint: "/dev/graphql",
+      },
     });
 
     // connect expressjs app
