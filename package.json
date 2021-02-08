@@ -32,6 +32,9 @@
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   },
+  "engines": {
+    "node": "12.16.1"
+  },
   "scripts": {
     "start": "nodemon src/server.ts",
     "start:prod": "nodemon build/src/server.js",
