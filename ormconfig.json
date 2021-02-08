@@ -1,9 +1,9 @@
 {
   "type": "postgres",
-  "host": "localhost",
+  "host": "postgresdb.cznbbfoqvamu.eu-central-1.rds.amazonaws.com",
   "port": 5432,
   "username": "postgres",
-  "password": "pass123",
+  "password": "PastWork1",
   "database": "postgres",
   "synchronize": true,
   "logging": false,

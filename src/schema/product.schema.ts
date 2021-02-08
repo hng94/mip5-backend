@@ -3,6 +3,7 @@ import { Field, ID, InputType, ObjectType } from "type-graphql";
 import { Column } from "typeorm";
 import { Order } from "../entity/order.entity";
 import { Project } from "../entity/project.entity";
+import { OrderDTO } from "./order.schema";
 import { ProjectDTO } from "./project.schema";
 
 @ObjectType()
@@ -26,6 +27,7 @@ export class ProductDTO {
   @Field((type) => ProjectDTO)
   project: Project;
 
+  @Field((type) => [OrderDTO])
   orders: Order[];
 }
 

@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { createConnection } from "typeorm";
 import * as express from "express";
 import { buildSchema } from "type-graphql";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer } from "apollo-server";
 import { jwtMiddleware, customAuthChecker } from "./middleware/auth";
 
 //Resolvers
@@ -13,6 +13,8 @@ import { CategoryResolver } from "./resolver/category.resolver";
 import { CommentResolver } from "./resolver/comment.resolver";
 import { LikeResolver } from "./resolver/like.resolver";
 import { AuthDTO } from "./schema/auth.schema";
+import { OrderResolver } from "./resolver/order.resolver";
+import { AuthContext } from "./common/type";
 
 createConnection()
   .then(async () => {
@@ -24,28 +26,29 @@ createConnection()
         ProjectResolver,
         CommentResolver,
         LikeResolver,
-        // CategoryResolver,
+        OrderResolver,
+        CategoryResolver,
       ],
       authChecker: customAuthChecker,
     });
     const server = new ApolloServer({
       schema,
       context: ({ req }) => {
-        const context = {
+        const context: AuthContext = {
           req,
-          user: req.user as AuthDTO, // `req.user` comes from `express-jwt`
+          currentUser: req.user as AuthDTO, // `req.user` comes from `express-jwt`
         };
         return context;
       },
     });
 
     // connect expressjs app
-    const app = express();
-    app.use(jwtMiddleware);
-    server.applyMiddleware({ app });
+    // const app = express();
+    // app.use(jwtMiddleware);
+    // server.applyMiddleware({ app });
 
     // start express server
-    app.listen({ port: 4000 }, () =>
+    server.listen({ port: 4000 }, () =>
       console.log(
         `🚀 Server ready at http://localhost:4000${server.graphqlPath}`
       )

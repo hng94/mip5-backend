@@ -1,10 +1,10 @@
 import { ApolloError, AuthenticationError } from "apollo-server";
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { AuthContext } from "../common/type";
 import { Comment } from "../entity/comment.entity";
 import { Project } from "../entity/project.entity";
 import { Timeline } from "../entity/timeline.entity";
 import { User } from "../entity/user.entity";
-import { CommentDTO, CreateCommentDTO } from "../schema/comment.schema";
 import { CreateTimelineDTO, TimelineDTO } from "../schema/timeline.schema";
 
 @Resolver(Timeline)
@@ -13,14 +13,11 @@ export class TimelineResolver {
   @Mutation(() => TimelineDTO)
   async createTimeline(
     @Arg("data") data: CreateTimelineDTO,
-    @Ctx() context: AuthenticationError
+    @Ctx() context: AuthContext
   ) {
     try {
-      const { user: currentUser } = context;
-      const creator = await User.findOne(currentUser.Id);
-      if (creator.id !== context.user.id) {
-        throw new AuthenticationError("Invalid user");
-      }
+      const { currentUser } = context;
+      const creator = await User.findOne(currentUser.id);
       const project = await Project.findOne(data.projectId);
       const newTimeline = Timeline.create(data);
       newTimeline.creator = creator;
@@ -34,19 +31,16 @@ export class TimelineResolver {
 
   @Authorized()
   @Mutation(() => Boolean)
-  async removeComment(
-    @Arg("id") id: string,
-    @Arg("creatorId") creatorId: string,
-    @Ctx() context
-  ) {
+  async removeTimeline(@Arg("id") id: string, @Ctx() context: AuthContext) {
     try {
-      const creator = await User.findOne(creatorId);
-      if (creator.id !== context.user.id) {
+      const { currentUser } = context;
+      const creator = await User.findOne(currentUser.id);
+      const timeline = await Timeline.findOne(id);
+      if (!timeline) throw new ApolloError("Timeline not found", "404");
+      if (creator.id !== timeline.creator.id) {
         throw new AuthenticationError("Invalid user");
       }
-      const comment = Timeline.findOne(id);
-      if (!comment) throw new ApolloError("Timeline not found", "404");
-      (await comment).remove();
+      (await timeline).remove();
       return true;
     } catch (error) {
       throw error;
