@@ -57,6 +57,9 @@ export class ProjectDTO {
 
   @Field((type) => Number)
   commentCount: number = 0;
+
+  @Field((type) => Date)
+  createdDate: Date;
 }
 
 @InputType()
