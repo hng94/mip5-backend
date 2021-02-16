@@ -79,6 +79,16 @@ export class Project extends BaseClass {
   @IsPositive()
   commentCount: number = 0;
 
+  @Column()
+  @IsPositive()
+  fundingGoal: number;
+
+  @Column()
+  startDate: Date;
+
+  @Column()
+  duration: number;
+
   @AfterLoad()
   updateProperties() {
     // this.subTitle = slugify(this.title);

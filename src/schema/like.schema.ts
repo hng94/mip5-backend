@@ -15,7 +15,7 @@ export class LikeDTO {
   project?: Project;
 
   @Field((type) => CommentDTO, { nullable: true })
-  commentId?: Comment;
+  comment?: Comment;
 
   @Field((type) => Date)
   createdDate: Date;

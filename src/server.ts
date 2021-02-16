@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { createConnection } from "typeorm";
 import * as express from "express";
 import { buildSchema } from "type-graphql";
-import { ApolloServer } from "apollo-server";
+import { ApolloServer } from "apollo-server-express";
 import { jwtMiddleware, customAuthChecker } from "./middleware/auth";
 
 //Resolvers
@@ -47,12 +47,13 @@ createConnection()
     });
 
     // connect expressjs app
-    // const app = express();
-    // app.use(jwtMiddleware);
-    // server.applyMiddleware({ app });
+    const app = express();
+    const path = "/graphql";
+    app.use(path, jwtMiddleware);
+    server.applyMiddleware({ app });
 
     // start express server
-    server.listen({ port: PORT }, () =>
+    app.listen({ port: PORT }, () =>
       console.log(
         `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
       )

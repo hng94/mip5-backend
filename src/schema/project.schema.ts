@@ -60,6 +60,15 @@ export class ProjectDTO {
 
   @Field((type) => Date)
   createdDate: Date;
+
+  @Field((type) => Number)
+  fundingGoal: number;
+
+  @Field((type) => Date)
+  startDate?: Date;
+
+  @Field((type) => Number)
+  duration?: number;
 }
 
 @InputType()
@@ -106,10 +115,10 @@ export class UpdateProjectInput {
   @Field({ nullable: true })
   story?: string;
 
-  @Field((type) => Date, { nullable: true })
+  @Field((type) => Date)
   startDate?: Date;
 
-  @Field((type) => Number, { nullable: true })
+  @Field((type) => Number)
   duration?: number;
 }
 
@@ -130,15 +139,15 @@ export class CreateProjectInput {
   @Field()
   story: string;
 
-  @Field((type) => Date, { nullable: true })
+  @Field((type) => Date)
   startDate?: Date;
 
-  @Field((type) => Number, { nullable: true })
+  @Field((type) => Number)
   duration?: number;
-
-  @Field((type) => ID)
-  creatorId: string;
 
   @Field((type) => [CreateProductInput])
   products: Partial<Product>[];
+
+  @Field((type) => Number)
+  fundingGoal: number;
 }
