@@ -1,5 +1,12 @@
 import { IsPositive } from "class-validator";
-import { BeforeUpdate, Column, Entity, ManyToOne, OneToMany } from "typeorm";
+import {
+  AfterLoad,
+  BeforeUpdate,
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+} from "typeorm";
 import { BaseClass } from "./base.entity";
 import { Like } from "./like.entity";
 import { Product } from "./product.entity";
@@ -8,7 +15,7 @@ import { User } from "./user.entity";
 
 @Entity()
 export class Comment extends BaseClass {
-  @ManyToOne(() => User, (user) => user.comments, { nullable: false })
+  @ManyToOne(() => User, (user) => user.comments, { eager: true })
   creator!: User;
 
   @ManyToOne(() => Project, (proj) => proj.comments, { nullable: false })
@@ -27,7 +34,13 @@ export class Comment extends BaseClass {
   likes: Like[];
 
   @BeforeUpdate()
-  updateProperties() {
+  saveProperties() {
     this.likeCount = this.likes.length;
+  }
+
+  @AfterLoad()
+  loadProperties() {
+    // this.subTitle = slugify(this.title);
+    this.likeCount = this.likes ? this.likes.length : 0;
   }
 }

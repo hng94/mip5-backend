@@ -15,6 +15,7 @@ import { LikeResolver } from "./resolver/like.resolver";
 import { AuthDTO } from "./schema/auth.schema";
 import { OrderResolver } from "./resolver/order.resolver";
 import { AuthContext } from "./common/type";
+import { TimelineResolver } from "./resolver/timeline.resolver";
 
 const PORT = process.env.PORT || 4000;
 createConnection()
@@ -29,6 +30,7 @@ createConnection()
         LikeResolver,
         OrderResolver,
         CategoryResolver,
+        TimelineResolver,
       ],
       authChecker: customAuthChecker,
     });

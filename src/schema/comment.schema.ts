@@ -12,10 +12,10 @@ abstract class ICommentDTO {
   id: string;
 
   @Field((type) => UserDTO)
-  creator!: User;
+  creator: User;
 
   @Field((type) => ProjectDTO)
-  project!: Project;
+  project: Project;
 
   @Field()
   content: string;
@@ -31,8 +31,8 @@ export class CommentDTO implements ICommentDTO {
   @Field((type) => Number)
   likeCount: number = 0;
 
-  @Field((type) => [LikeDTO])
-  likes: Like[];
+  @Field((type) => [LikeDTO], { nullable: true })
+  likes?: Like[];
 
   @Field((type) => Date)
   createdDate: Date;

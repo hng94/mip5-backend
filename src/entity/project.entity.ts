@@ -83,11 +83,11 @@ export class Project extends BaseClass {
   @IsPositive()
   fundingGoal: number;
 
-  @Column()
-  startDate: Date;
+  @Column({ nullable: true })
+  startDate?: Date;
 
-  @Column()
-  duration: number;
+  @Column({ nullable: true })
+  duration?: number;
 
   @AfterLoad()
   updateProperties() {

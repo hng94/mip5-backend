@@ -10,7 +10,11 @@ import { User } from "../entity/user.entity";
 import { CategoryDTO } from "./category.schema";
 import { CommentDTO } from "./comment.schema";
 import { LikeDTO } from "./like.schema";
-import { CreateProductInput, ProductDTO } from "./product.schema";
+import {
+  CreateProductInput,
+  ProductDTO,
+  UpdateProductInput,
+} from "./product.schema";
 import { TimelineDTO } from "./timeline.schema";
 import { UserDTO } from "./user.schema";
 
@@ -31,7 +35,7 @@ export class ProjectDTO {
   @Field((type) => CategoryDTO)
   category!: Category;
 
-  @Field()
+  @Field((type) => String)
   story: string = "";
 
   @Field((type) => UserDTO)
@@ -64,10 +68,10 @@ export class ProjectDTO {
   @Field((type) => Number)
   fundingGoal: number;
 
-  @Field((type) => Date)
+  @Field((type) => Date, { nullable: true })
   startDate?: Date;
 
-  @Field((type) => Number)
+  @Field((type) => Number, { nullable: true })
   duration?: number;
 }
 
@@ -88,38 +92,38 @@ export class QueryProjectInput {
   @Field({ nullable: true })
   order?: SortEnum = null;
 
-  @Field({ nullable: true })
+  @Field((type) => Number, { nullable: true })
   take?: number = 9;
 
-  @Field({ nullable: true })
+  @Field((type) => Number, { nullable: true })
   skip?: number = 0;
 }
 
 @InputType()
 export class UpdateProjectInput {
-  @Field((type) => ID, { nullable: true })
-  id: string;
-
-  @Field({ nullable: true })
+  @Field((type) => String, { nullable: true })
   title?: string;
 
-  @Field({ nullable: true })
+  @Field((type) => String, { nullable: true })
   subTitle?: string;
 
-  @Field({ nullable: true })
+  @Field((type) => String, { nullable: true })
   url?: string;
 
   @Field((type) => ID, { nullable: true })
   categoryId?: string;
 
-  @Field({ nullable: true })
+  @Field((type) => String, { nullable: true })
   story?: string;
 
-  @Field((type) => Date)
-  startDate?: Date;
+  // @Field((type) => Date, { nullable: true })
+  // startDate?: Date;
 
-  @Field((type) => Number)
-  duration?: number;
+  // @Field((type) => Number, { nullable: true })
+  // duration?: number;
+
+  @Field((type) => [CreateProductInput])
+  products: Partial<Product>[];
 }
 
 @InputType()
@@ -139,10 +143,10 @@ export class CreateProjectInput {
   @Field()
   story: string;
 
-  @Field((type) => Date)
+  @Field((type) => Date, { nullable: true })
   startDate?: Date;
 
-  @Field((type) => Number)
+  @Field((type) => Number, { nullable: true })
   duration?: number;
 
   @Field((type) => [CreateProductInput])

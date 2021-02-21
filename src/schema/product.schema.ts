@@ -46,3 +46,22 @@ export class CreateProductInput {
   @Field()
   url: string;
 }
+
+@InputType()
+export class UpdateProductInput {
+  @Field((type) => ID)
+  id: string;
+
+  @Field()
+  title: string;
+
+  @Field()
+  description: string;
+
+  @Field((type) => Number)
+  @IsPositive()
+  price: number;
+
+  @Field()
+  url: string;
+}

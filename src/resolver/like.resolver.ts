@@ -11,11 +11,12 @@ import {
   LikeDTO,
   LikeCommentInputDTO,
 } from "../schema/like.schema";
+import { ProjectDTO } from "../schema/project.schema";
 
 @Resolver(Like)
 export class LikeResolver {
   @Authorized()
-  @Mutation(() => Boolean)
+  @Mutation(() => ProjectDTO)
   async likeProject(
     @Arg("data") data: LikeProjectInputDTO,
     @Ctx() context: AuthContext
@@ -31,21 +32,21 @@ export class LikeResolver {
       if (like) {
         await like.remove();
         await like.save();
-        return true;
       } else {
         const newLike = Like.create();
         newLike.creator = creator;
         newLike.project = project;
         await newLike.save();
-        return true;
       }
+      const updatedProject = await Project.findOne(data.projectId);
+      return updatedProject;
     } catch (error) {
       throw error;
     }
   }
 
   @Authorized()
-  @Mutation(() => Boolean)
+  @Mutation(() => CommentDTO)
   async likeComment(
     @Arg("data") data: LikeCommentInputDTO,
     @Ctx() context: AuthContext
@@ -64,14 +65,14 @@ export class LikeResolver {
       if (like) {
         await like.remove();
         await like.save();
-        return true;
       } else {
         const newLike = Like.create();
         newLike.creator = creator;
         newLike.comment = comment;
         await newLike.save();
-        return true;
       }
+      const updatedComment = await Comment.findOne(data.commentId);
+      return updatedComment;
     } catch (error) {
       throw error;
     }

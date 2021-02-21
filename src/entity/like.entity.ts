@@ -16,7 +16,7 @@ export class Like extends BaseClass {
   })
   creator!: User;
 
-  @ManyToOne(() => Project, (proj) => proj.comments)
+  @ManyToOne(() => Project, (proj) => proj.likes)
   project: Project;
 
   @ManyToOne(() => Comment, (proj) => proj.likes)

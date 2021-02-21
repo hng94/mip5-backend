@@ -23,13 +23,15 @@ export class ProjectResolver {
   async projects(@Arg("data") data: QueryProjectInput) {
     const query = getRepository(Project)
       .createQueryBuilder("project")
-      .leftJoinAndSelect("project.creator", "user")
+      .leftJoinAndSelect("project.comments", "comment")
+      .leftJoinAndSelect("project.creator", "creator")
       .leftJoinAndSelect("project.category", "category")
+      .leftJoinAndSelect("project.likes", "like")
       .select();
 
     //build query
     if (data.searchKey) {
-      query.where("project.name ~* :searchKey", {
+      query.where("project.title ~* :searchKey", {
         searchKey: data.searchKey,
       });
     }
@@ -40,17 +42,19 @@ export class ProjectResolver {
       });
     }
 
-    if (data.categoryId) {
-      query.andWhere("category.id = :categoryId", {
-        categoryId: data.categoryId,
-      });
-    }
+    // if (data.categoryId) {
+    //   query.andWhere("category.id = :categoryId", {
+    //     categoryId: data.categoryId,
+    //   });
+    // }
 
-    if (data.order) {
-      query.orderBy(`project.${data.order}`, "ASC");
-    }
+    // if (data.order) {
+    //   query.orderBy(`project.${data.order}`, "ASC");
+    // }
 
-    const projects = query.skip(data.skip).take(data.take).getMany();
+    // const projects = await query.skip(data.skip).take(data.take).getMany();
+    query.andWhere("project.deletedDate IS NULL");
+    const projects = await query.getMany();
 
     return projects;
   }
@@ -96,16 +100,24 @@ export class ProjectResolver {
   @Authorized()
   @Mutation(() => ProjectDTO)
   async updateProject(
-    @Arg("data") data: UpdateProjectInput,
+    @Arg("data") data: CreateProjectInput,
+    @Arg("id") id: string,
     @Ctx() context: AuthContext
   ) {
     try {
-      let project = await Project.findOne(data.id);
+      let project = await Project.findOne(id);
+      let product = project.products?.[0];
       Object.keys(data).forEach((prop) => {
-        if (prop != "id" && data[prop]) {
+        if (prop != "id" && prop !== "products" && data[prop]) {
           project[prop] = data[prop];
         }
       });
+      if (product) {
+        product.title = data.products[0].title;
+        product.description = data.products[0].description;
+        product.price = data.products[0].price;
+        product.url = data.products[0].url;
+      }
       if (data.categoryId) {
         const category = await Category.findOne(data.categoryId);
         project.category = category;
@@ -118,13 +130,19 @@ export class ProjectResolver {
   }
 
   @Authorized()
-  @Mutation(() => Boolean)
+  @Mutation(() => String)
   async removeProject(@Arg("id") id: string, @Ctx() context) {
     try {
-      const project = await Project.findOne(id);
-      await project.softRemove();
-      project.save();
-      return true;
+      const softDeleteQuery = getRepository(Project)
+        .createQueryBuilder("project")
+        .leftJoinAndSelect("project.creator", "creator")
+        .where("project.id = :id AND creator.id = creatorId", {
+          id,
+          creatorId: context.currentUser.id,
+        })
+        .softDelete();
+      softDeleteQuery.execute();
+      return id;
     } catch (error) {
       throw error;
     }

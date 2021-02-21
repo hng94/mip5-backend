@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, InputType, ObjectType } from "type-graphql";
 import { BaseClass } from "../entity/base.entity";
 import { Comment } from "../entity/comment.entity";
 import { Order } from "../entity/order.entity";
@@ -35,4 +35,21 @@ export class UserDTO {
   orders?: Order[];
 
   comments?: Comment[];
+}
+
+@InputType()
+export class UpdateUserInput {
+  @Field()
+  firstName: string;
+
+  @Field()
+  lastName: string;
+  @Field({ nullable: true })
+  address?: string;
+
+  @Field({ nullable: true })
+  postcode?: string;
+
+  @Field({ nullable: true })
+  phone?: string;
 }
