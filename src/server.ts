@@ -4,8 +4,7 @@ import * as express from "express";
 import { buildSchema } from "type-graphql";
 import { ApolloServer } from "apollo-server-express";
 import { jwtMiddleware, customAuthChecker } from "./middleware/auth";
-const fs = require("fs");
-const https = require("https");
+
 //Resolvers
 import { UserResolver } from "./resolver/user.resolver.";
 import { AuthResolver } from "./resolver/auth.resolver";
@@ -50,25 +49,15 @@ createConnection()
     });
 
     // connect expressjs app
-    const key = fs.readFileSync("./server.key");
-    const cert = fs.readFileSync("./server.cert");
-    const credentials = { key, cert };
     const app = express();
     const path = "/graphql";
     app.use(path, jwtMiddleware);
     server.applyMiddleware({ app });
 
     // start express server
-    // app.listen({ port: PORT }, () =>
-    //   console.log(
-    //     `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
-    //   )
-    // );
-
-    const httpsServer = https.createServer(credentials, app);
-    httpsServer.listen({ port: 4003 }, () =>
+    app.listen({ port: PORT }, () =>
       console.log(
-        `🚀 Server ready at https://localhost:${4003}${server.graphqlPath}`
+        `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
       )
     );
   })
