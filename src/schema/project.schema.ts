@@ -65,6 +65,9 @@ export class ProjectDTO {
   @Field((type) => Date)
   createdDate: Date;
 
+  @Field((type) => Date, { nullable: true })
+  deletedDate?: Date;
+
   @Field((type) => Number)
   fundingGoal: number;
 

@@ -11,16 +11,19 @@ export class OrderDTO {
   id: string;
 
   @Field((type) => UserDTO)
-  creator!: User;
+  creator: User;
 
   @Field((type) => ProductDTO)
-  product!: Product;
+  product: Product;
 
   @Field((type) => Number)
-  quantity!: number;
+  quantity: number;
 
   @Field((type) => OrderStatus)
   status: OrderStatus = OrderStatus.Process;
+
+  @Field((type) => Date)
+  createdDate: Date;
 }
 
 @InputType()

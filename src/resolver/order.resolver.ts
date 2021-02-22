@@ -1,5 +1,6 @@
 import { AuthenticationError } from "apollo-server";
-import { Arg, Authorized, Ctx, Mutation, Resolver } from "type-graphql";
+import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { getRepository } from "typeorm";
 import { OrderStatus } from "../common/enum";
 import { AuthContext } from "../common/type";
 import { Order } from "../entity/order.entity";
@@ -13,6 +14,18 @@ import {
 
 @Resolver(Order)
 export class OrderResolver {
+  @Authorized()
+  @Query(() => [OrderDTO])
+  async myOrders(@Ctx() context: AuthContext) {
+    const id = context.currentUser.id;
+    const user = await User.findOne(id, {
+      relations: ["orders", "orders.product", "orders.product.project"],
+      withDeleted: false,
+    });
+    const myOrders = user.orders.filter((order) => order.deletedDate == null);
+    return myOrders;
+  }
+
   @Authorized()
   @Mutation(() => OrderDTO)
   async createOrder(
@@ -77,17 +90,16 @@ export class OrderResolver {
   }
 
   @Authorized()
-  @Mutation(() => Boolean)
+  @Mutation(() => String)
   async removeOrder(@Arg("id") id: string, @Ctx() context: AuthContext) {
     try {
       const { currentUser } = context;
-      const order = await Order.findOne(id);
+      const order = await Order.findOne(id, { relations: ["creator"] });
       if (order.creator.id !== currentUser.id) {
         throw new AuthenticationError("Invalid User");
       }
-      await order.remove();
-      await order.save();
-      return true;
+      await Order.softRemove(order);
+      return id;
     } catch (error) {
       throw error;
     }

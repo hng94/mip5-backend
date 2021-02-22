@@ -33,7 +33,7 @@ export class Project extends BaseClass {
   @ManyToOne(() => Category, (category) => category.projects, {
     eager: true,
     nullable: false,
-    cascade: true,
+    cascade: ["insert"],
   })
   category!: Category;
 

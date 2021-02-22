@@ -30,6 +30,7 @@ export class Comment extends BaseClass {
 
   @OneToMany(() => Like, (like) => like.comment, {
     eager: true,
+    cascade: true,
   })
   likes: Like[];
 

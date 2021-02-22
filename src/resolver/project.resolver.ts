@@ -62,6 +62,21 @@ export class ProjectResolver {
   @Query(() => ProjectDTO)
   async project(@Arg("id") id: string) {
     const project = await Project.findOne(id);
+    // const query = getRepository(Project)
+    //   .createQueryBuilder("project")
+    //   .leftJoinAndSelect("project.comments", "comment")
+    //   .leftJoinAndSelect("project.timelines", "timeline")
+    //   .leftJoinAndSelect("project.creator", "creator")
+    //   .leftJoinAndSelect("project.products", "product")
+    //   .leftJoinAndSelect("product.orders", "order")
+    //   .leftJoinAndSelect("project.category", "category")
+    //   .leftJoinAndSelect("project.likes", "like")
+    //   .withDeleted()
+    //   .where("project.id = :id", {
+    //     id,
+    //   })
+    //   .select();
+    // const project = await query.getOne();
     return project;
   }
 
@@ -131,17 +146,29 @@ export class ProjectResolver {
 
   @Authorized()
   @Mutation(() => String)
-  async removeProject(@Arg("id") id: string, @Ctx() context) {
+  async removeProject(@Arg("id") id: string, @Ctx() context: AuthContext) {
     try {
-      const softDeleteQuery = getRepository(Project)
-        .createQueryBuilder("project")
-        .leftJoinAndSelect("project.creator", "creator")
-        .where("project.id = :id AND creator.id = creatorId", {
-          id,
-          creatorId: context.currentUser.id,
-        })
-        .softDelete();
-      softDeleteQuery.execute();
+      // const softDeleteQuery = getRepository(Project)
+      //   .createQueryBuilder("project")
+      //   .leftJoinAndSelect("project.creator", "creator")
+      //   .where("project.id = :id", {
+      //     id,
+      //   })
+      //   .andWhere("creator.id = :creatorId", {
+      //     creatorId: context.currentUser.id,
+      //   })
+      //   .softDelete();
+      // await softDeleteQuery.execute();
+      const project = await Project.findOne(
+        { id },
+        {
+          relations: ["products", "products.orders", "creator"],
+        }
+      );
+      if (project.creator.id != context.currentUser.id) {
+        return new AuthenticationError("Invalid user");
+      }
+      Project.softRemove(project);
       return id;
     } catch (error) {
       throw error;

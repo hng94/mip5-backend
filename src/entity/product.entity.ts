@@ -22,6 +22,9 @@ export class Product extends BaseClass {
   @ManyToOne(() => Project, (project) => project.products)
   project: Project;
 
-  @OneToMany(() => Order, (order) => order.product, { eager: true })
+  @OneToMany(() => Order, (order) => order.product, {
+    eager: true,
+    cascade: true,
+  })
   orders: Order[];
 }
