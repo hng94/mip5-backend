@@ -71,6 +71,9 @@ export class ProjectDTO {
   @Field((type) => Number)
   fundingGoal: number;
 
+  @Field((type) => Number)
+  currentFund: number;
+
   @Field((type) => Date, { nullable: true })
   startDate?: Date;
 
@@ -125,8 +128,8 @@ export class UpdateProjectInput {
   // @Field((type) => Number, { nullable: true })
   // duration?: number;
 
-  @Field((type) => [CreateProductInput])
-  products: Partial<Product>[];
+  @Field((type) => [CreateProductInput], { nullable: true })
+  products?: Partial<Product>[];
 }
 
 @InputType()

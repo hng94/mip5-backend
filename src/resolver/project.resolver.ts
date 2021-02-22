@@ -17,6 +17,15 @@ import {
   UpdateProjectInput,
 } from "../schema/project.schema";
 
+function getCurrentFund(project: Project) {
+  const price = project.products?.[0].price || 0;
+  const quantity = project.products?.[0].orders
+    .map((o) => o.quantity)
+    .reduce((q, total) => q + total, 0);
+  const currentFund = price * quantity;
+  return currentFund;
+}
+
 @Resolver(Project)
 export class ProjectResolver {
   @Query(() => [ProjectDTO])
@@ -26,6 +35,8 @@ export class ProjectResolver {
       .leftJoinAndSelect("project.comments", "comment")
       .leftJoinAndSelect("project.creator", "creator")
       .leftJoinAndSelect("project.category", "category")
+      .leftJoinAndSelect("project.products", "product")
+      .leftJoinAndSelect("product.orders", "order")
       .leftJoinAndSelect("project.likes", "like")
       .select();
 
@@ -55,28 +66,14 @@ export class ProjectResolver {
     // const projects = await query.skip(data.skip).take(data.take).getMany();
     query.andWhere("project.deletedDate IS NULL");
     const projects = await query.getMany();
-
+    projects.forEach((p) => (p.currentFund = getCurrentFund(p)));
     return projects;
   }
 
   @Query(() => ProjectDTO)
   async project(@Arg("id") id: string) {
     const project = await Project.findOne(id);
-    // const query = getRepository(Project)
-    //   .createQueryBuilder("project")
-    //   .leftJoinAndSelect("project.comments", "comment")
-    //   .leftJoinAndSelect("project.timelines", "timeline")
-    //   .leftJoinAndSelect("project.creator", "creator")
-    //   .leftJoinAndSelect("project.products", "product")
-    //   .leftJoinAndSelect("product.orders", "order")
-    //   .leftJoinAndSelect("project.category", "category")
-    //   .leftJoinAndSelect("project.likes", "like")
-    //   .withDeleted()
-    //   .where("project.id = :id", {
-    //     id,
-    //   })
-    //   .select();
-    // const project = await query.getOne();
+    project.currentFund = getCurrentFund(project);
     return project;
   }
 
@@ -113,7 +110,7 @@ export class ProjectResolver {
   }
 
   @Authorized()
-  @Mutation(() => ProjectDTO)
+  @Mutation(() => String)
   async updateProject(
     @Arg("data") data: CreateProjectInput,
     @Arg("id") id: string,
@@ -121,24 +118,25 @@ export class ProjectResolver {
   ) {
     try {
       let project = await Project.findOne(id);
-      let product = project.products?.[0];
+      let product = await Product.findOne(project.products[0].id);
       Object.keys(data).forEach((prop) => {
         if (prop != "id" && prop !== "products" && data[prop]) {
           project[prop] = data[prop];
         }
       });
       if (product) {
-        product.title = data.products[0].title;
-        product.description = data.products[0].description;
-        product.price = data.products[0].price;
-        product.url = data.products[0].url;
+        project.products[0].title = data.products[0].title;
+        project.products[0].description = data.products[0].description;
+        project.products[0].price = data.products[0].price;
+        project.products[0].url = data.products[0].url;
       }
+
       if (data.categoryId) {
         const category = await Category.findOne(data.categoryId);
         project.category = category;
       }
       await project.save();
-      return project;
+      return id;
     } catch (error) {
       return error;
     }
@@ -148,17 +146,6 @@ export class ProjectResolver {
   @Mutation(() => String)
   async removeProject(@Arg("id") id: string, @Ctx() context: AuthContext) {
     try {
-      // const softDeleteQuery = getRepository(Project)
-      //   .createQueryBuilder("project")
-      //   .leftJoinAndSelect("project.creator", "creator")
-      //   .where("project.id = :id", {
-      //     id,
-      //   })
-      //   .andWhere("creator.id = :creatorId", {
-      //     creatorId: context.currentUser.id,
-      //   })
-      //   .softDelete();
-      // await softDeleteQuery.execute();
       const project = await Project.findOne(
         { id },
         {

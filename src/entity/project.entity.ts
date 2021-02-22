@@ -33,7 +33,7 @@ export class Project extends BaseClass {
   @ManyToOne(() => Category, (category) => category.projects, {
     eager: true,
     nullable: false,
-    cascade: ["insert"],
+    cascade: ["insert", "update"],
   })
   category!: Category;
 
@@ -89,10 +89,19 @@ export class Project extends BaseClass {
   @Column({ nullable: true })
   duration?: number;
 
+  @Column({ default: 0 })
+  @IsPositive()
+  currentFund: number;
+
   @AfterLoad()
   updateProperties() {
     // this.subTitle = slugify(this.title);
     this.commentCount = this.comments ? this.comments.length : 0;
     this.likeCount = this.likes ? this.likes.length : 0;
+    // const price = this.products?.[0].price || 0;
+    // const quantity = this.products?.[0].orders
+    //   .map((o) => o.quantity)
+    //   .reduce((q, total) => q + total, 0);
+    // this.currentFund = price * quantity;
   }
 }
